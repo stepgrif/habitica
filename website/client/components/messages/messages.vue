@@ -19,7 +19,7 @@
           .close
             span.svg-icon.inline.icon-10(aria-hidden="true", v-html="icons.svgClose", @click="close()")
     .row
-      .col-4.sidebar
+      .col-3.sidebar
         .search-section
           b-form-input(:placeholder="$t('search')", v-model='search')
         .empty-messages.text-center(v-if='filtersConversations.length === 0')
@@ -36,7 +36,7 @@
               span.mr-1(v-if='conversation.username') @{{ conversation.username }} •
               span {{ conversation.date | timeAgo }}
             div {{conversation.lastMessageText ? conversation.lastMessageText.substring(0, 30) : ''}}
-      .col-8.messages.d-flex.flex-column.justify-content-between
+      .col-9.messages.d-flex.flex-column.justify-content-between
         .empty-messages.text-center(v-if='!selectedConversation.key')
           .svg-icon.envelope(v-html="icons.messageIcon")
           h4 {{placeholderTexts.title}}
@@ -58,70 +58,49 @@
             @keyup.ctrl.enter='sendPrivateMessage()',
             maxlength='3000'
           )
-          button.btn.btn-secondary(@click='sendPrivateMessage()') {{$t('send')}}
+          button.btn.btn-primary(@click='sendPrivateMessage()') {{$t('send')}}
           .row
             span.ml-3 {{ currentLength }} / 3000
 </template>
+
+<style lang='scss'>
+  #messages-modal___BV_modal_outer_ {
+    .modal-body {
+      padding: 0rem 0.75rem;
+    }
+
+    .modal-content {
+      width: 66vw;
+    }
+
+    .modal-dialog {
+      margin: 10vh 15vw 0rem;
+    }
+  }
+</style>
 
 <style lang="scss" scoped>
   @import '~client/assets/scss/colors.scss';
   @import '~client/assets/scss/tiers.scss';
 
-  .header-wrap {
-    padding: 0.5em;
-
-    h2 {
-      margin: 0;
-      line-height: 1;
-    }
+  .conversations {
+    max-height: 35rem;
+    overflow-x: hidden;
+    overflow-y: scroll;
   }
 
-  h3 {
-    margin: 0rem;
-
-    .svg-icon {
-      width: 10px;
-      display: inline-block;
-      margin-left: .5em;
-    }
+  .conversation {
+    padding: 1.5em;
+    background: $white;
+    border: 1px solid $white;
   }
 
-  .envelope {
-    color: $gray-400 !important;
-    margin: 0;
+  .conversation.active {
+    border: 1px solid $purple-400;
   }
 
-  .sidebar {
-    background-color: $gray-700;
-    min-height: 600px;
-    padding: 0;
-
-    .search-section {
-      padding: 1em;
-      box-shadow: 0 1px 2px 0 rgba(26, 24, 29, 0.24);
-    }
-  }
-
-  .messages {
-    position: relative;
-    padding-left: 0;
-    padding-bottom: 6em;
-  }
-
-  .message-scroll {
-    max-height: 500px;
-    overflow-x: scroll;
-
-    @media (min-width: 992px) {
-      overflow-x: hidden;
-      overflow-y: scroll;
-    }
-  }
-
-  .to-form input {
-    width: 60%;
-    display: inline-block;
-    margin-left: 1em;
+  .conversation:hover {
+    cursor: pointer;
   }
 
   .empty-messages {
@@ -140,8 +119,71 @@
     }
   }
 
-  .pm-disabled-caption {
+  .envelope {
+    color: $gray-400 !important;
+    margin: 0;
+  }
 
+  h3 {
+    margin: 0rem;
+
+    .svg-icon {
+      width: 10px;
+      display: inline-block;
+      margin-left: .5em;
+    }
+  }
+
+  .header-wrap {
+    padding: 0.5em;
+
+    h2 {
+      margin: 0;
+      line-height: 1;
+    }
+  }
+
+  .messages {
+    position: relative;
+    padding: 0rem;
+  }
+
+  .message-scroll {
+    height: 33.5rem;
+    overflow-x: scroll;
+    padding-top: 0.5rem;
+
+    @media (min-width: 992px) {
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+  }
+
+  .new-message-row {
+    background-color: $gray-700;
+    position: absolute;
+    bottom: 0;
+    height: 88px;
+    width: 100%;
+    padding: 1em;
+    border-bottom-right-radius: 3px;
+
+    textarea {
+      height: 80%;
+      display: inline-block;
+      vertical-align: bottom;
+      width: 80%;
+    }
+
+    button {
+      vertical-align: bottom;
+      display: inline-block;
+      box-shadow: none;
+      margin-left: 1em;
+    }
+  }
+
+  .pm-disabled-caption {
     padding-top: 1em;
     background-color: $gray-700;
     z-index: 2;
@@ -161,52 +203,27 @@
     }
   }
 
-  .new-message-row {
+  .sidebar {
     background-color: $gray-700;
-    position: absolute;
-    bottom: 0;
-    height: 88px;
-    width: 100%;
-    padding: 1em;
+    min-height: 600px;
+    padding: 0;
 
-    textarea {
-      height: 80%;
-      display: inline-block;
-      vertical-align: bottom;
-      width: 80%;
+    .search-section {
+      padding: 1em;
+      box-shadow: 0 1px 2px 0 rgba(26, 24, 29, 0.24);
     }
-
-    button {
-      vertical-align: bottom;
-      display: inline-block;
-      box-shadow: none;
-      margin-left: 1em;
-    }
-  }
-
-  .conversations {
-    max-height: 400px;
-    overflow-x: hidden;
-    overflow-y: scroll;
-  }
-
-  .conversation {
-    padding: 1.5em;
-    background: $white;
-  }
-
-  .conversation.active {
-    border: 1px solid $purple-400;
-  }
-
-  .conversation:hover {
-    cursor: pointer;
   }
 
   .time {
     font-size: 12px;
     color: $gray-200;
     margin-bottom: 0.5rem;
+  }
+
+  .to-form input {
+    width: 60%;
+    display: inline-block;
+    margin-left: 1em;
   }
 </style>
 
@@ -489,7 +506,7 @@
         this.newMessage = '';
       },
       close () {
-        this.$root.$emit('bv::hide::modal', 'message-modal');
+        this.$root.$emit('bv::hide::modal', 'messages-modal');
       },
       tierIcon (message) {
         const isNPC = Boolean(message.backer && message.backer.npc);

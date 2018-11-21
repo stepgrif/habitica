@@ -1,34 +1,36 @@
 <template lang="pug">
   .container-fluid
-    .row(v-for="(msg, index) in messages", v-if='chat')
+    .row.ml-2(v-for="(msg, index) in messages", v-if='chat', :class='{"mr-2": user._id !== msg.uuid}')
       .d-flex.flex-grow-1(v-if='user._id !== msg.uuid')
-        avatar.avatar-left.inbox-avatar-left(
-          v-if='msg.userStyles || (cachedProfileData[msg.uuid] && !cachedProfileData[msg.uuid].rejected)',
-          :member="msg.userStyles || cachedProfileData[msg.uuid]",
-          :avatarOnly="true",
-          :overrideTopPadding='"14px"',
-          :hideClassBadge='true',
-          @click.native="showMemberModal(msg.uuid)"
-        )
-        .card.col-10
+        .col-2
+          avatar.avatar-left(
+            v-if='msg.userStyles || (cachedProfileData[msg.uuid] && !cachedProfileData[msg.uuid].rejected)',
+            :member="msg.userStyles || cachedProfileData[msg.uuid]",
+            :avatarOnly="true",
+            :overrideTopPadding='"14px"',
+            :hideClassBadge='true',
+            @click.native="showMemberModal(msg.uuid)"
+          )
+        .col-10.card.card-right
           message-card(
             :msg='msg',
             @message-removed='messageRemoved',
             @show-member-modal='showMemberModal')
       .d-flex.flex-grow-1(v-if='user._id === msg.uuid')
-        .card.col-10
+        .col-10.card.card-left
           message-card(
             :msg='msg',
             @message-removed='messageRemoved',
             @show-member-modal='showMemberModal')
-        avatar.inbox-avatar-right(
-          v-if='msg.userStyles || (cachedProfileData[msg.uuid] && !cachedProfileData[msg.uuid].rejected)',
-          :member="msg.userStyles || cachedProfileData[msg.uuid]",
-          :avatarOnly="true",
-          :hideClassBadge='true',
-          :overrideTopPadding='"14px"',
-          @click.native="showMemberModal(msg.uuid)"
-        )
+        .col-2
+          avatar.avatar-right(
+            v-if='msg.userStyles || (cachedProfileData[msg.uuid] && !cachedProfileData[msg.uuid].rejected)',
+            :member="msg.userStyles || cachedProfileData[msg.uuid]",
+            :avatarOnly="true",
+            :hideClassBadge='true',
+            :overrideTopPadding='"14px"',
+            @click.native="showMemberModal(msg.uuid)"
+          )
 </template>
 
 <style lang="scss" scoped>
@@ -40,18 +42,31 @@
   }
 
   .avatar-left {
-    margin-left: -1.5rem;
-    margin-right: 2rem;
+    margin-left: -3rem;
   }
 
-  .inbox-avatar-left {
-    margin-left: -1rem;
-    margin-right: 2.5rem;
-    min-width: 5rem;
+  @media (min-width: 1280px) {
+    .avatar-left {
+      margin-left: -1rem;
+    }
   }
 
-  .inbox-avatar-right {
-    margin-left: -3.5rem;
+  .avatar-right {
+    margin-left: -2rem;
+  }
+
+  .card {
+    border: 0px;
+    margin-bottom: .5em;
+    padding: 0rem;
+  }
+
+  .card-left {
+    border: 1px solid $header-color;
+  }
+
+  .card-right {
+    border: 1px solid $gray-500;
   }
 
   .hr {
@@ -74,13 +89,6 @@
     margin-top: .2em;
     display: inline-block;
     width: 100px;
-  }
-
-  .card {
-    border: 0px;
-    margin-bottom: .5em;
-    padding: 0rem;
-    width: 90%;
   }
 </style>
 
