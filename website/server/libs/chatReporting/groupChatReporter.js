@@ -28,7 +28,7 @@ export default class GroupChatReporter extends ChatReporter {
 
   async validate () {
     this.req.checkParams('groupId', apiError('groupIdRequired')).notEmpty();
-    this.req.checkParams('chatId', this.res.t('chatIdRequired')).notEmpty();
+    this.req.checkParams('chatId', apiError('chatIdRequired')).notEmpty();
 
     let validationErrors = this.req.validationErrors();
     if (validationErrors) throw validationErrors;

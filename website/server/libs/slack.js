@@ -9,6 +9,10 @@ const SLACK_FLAGGING_URL = nconf.get('SLACK:FLAGGING_URL');
 const SLACK_FLAGGING_FOOTER_LINK = nconf.get('SLACK:FLAGGING_FOOTER_LINK');
 const SLACK_SUBSCRIPTIONS_URL = nconf.get('SLACK:SUBSCRIPTIONS_URL');
 const BASE_URL = nconf.get('BASE_URL');
+const IS_PRODUCTION = nconf.get('IS_PROD');
+
+const SKIP_FLAG_METHODS = IS_PRODUCTION && !SLACK_FLAGGING_URL;
+const SKIP_SUB_METHOD = IS_PRODUCTION && !SLACK_SUBSCRIPTIONS_URL;
 
 let flagSlack;
 let subscriptionSlack;
@@ -18,6 +22,14 @@ try {
   subscriptionSlack = new IncomingWebhook(SLACK_SUBSCRIPTIONS_URL);
 } catch (err) {
   logger.error(err);
+
+  if (!IS_PRODUCTION) {
+    flagSlack = subscriptionSlack = {
+      send (data) {
+        logger.info('Data sent to slack', data);
+      },
+    };
+  }
 }
 
 function sendFlagNotification ({
@@ -28,13 +40,13 @@ function sendFlagNotification ({
   userComment,
   automatedComment,
 }) {
-  if (!SLACK_FLAGGING_URL) {
+  if (SKIP_FLAG_METHODS) {
     return;
   }
   let titleLink;
   let authorName;
   let title = `Flag in ${group.name}`;
-  let text = `${flagger.profile.name} (${flagger.id}; language: ${flagger.preferences.language}) flagged a message`;
+  let text = `${flagger.profile.name} (${flagger.id}; language: ${flagger.preferences.language}) flagged a group message`;
   let footer = `<${SLACK_FLAGGING_FOOTER_LINK}?groupId=${group.id}&chatId=${message.id}|Flag this message.>`;
 
   if (userComment) {
@@ -77,6 +89,63 @@ function sendFlagNotification ({
   });
 }
 
+function formatUser (name, email, uuid) {
+  return `${name} (${email}; ${uuid}`;
+}
+
+function sendInboxFlagNotification ({
+  authorEmail,
+  flagger,
+  message,
+  userComment,
+}) {
+  if (SKIP_FLAG_METHODS) {
+    return;
+  }
+  let titleLink;
+  let authorName;
+  let title = `Flag in ${flagger.profile.name}'s Inbox`;
+  let text = `${flagger.profile.name} (${flagger.id}; language: ${flagger.preferences.language}) flagged a PM`;
+  let footer = '';
+
+  if (userComment) {
+    text += ` and commented: ${userComment}`;
+  }
+
+  let messageText = message.text;
+  let sender = '';
+  let recipient = '';
+
+  const flaggerFormat = formatUser(flagger.profile.name, flagger.auth.local.email, flagger._id);
+  const messageUserFormat = formatUser(message.user, authorEmail, message.uuid);
+
+  if (message.sent) {
+    sender = flaggerFormat;
+    recipient = messageUserFormat;
+  } else {
+    sender = messageUserFormat;
+    recipient = flaggerFormat;
+  }
+
+  authorName = `${sender} is writing this message to ${recipient}.`;
+
+  flagSlack.send({
+    text,
+    attachments: [{
+      fallback: 'Flag Message',
+      color: 'danger',
+      author_name: authorName,
+      title,
+      title_link: titleLink,
+      text: messageText,
+      footer,
+      mrkdwn_in: [
+        'text',
+      ],
+    }],
+  });
+}
+
 function sendSubscriptionNotification ({
   buyer,
   recipient,
@@ -84,7 +153,7 @@ function sendSubscriptionNotification ({
   months,
   groupId,
 }) {
-  if (!SLACK_SUBSCRIPTIONS_URL) {
+  if (SKIP_SUB_METHOD) {
     return;
   }
   let text;
@@ -108,7 +177,7 @@ function sendSlurNotification ({
   group,
   message,
 }) {
-  if (!SLACK_FLAGGING_URL) {
+  if (SKIP_FLAG_METHODS) {
     return;
   }
   let titleLink;
@@ -143,5 +212,8 @@ function sendSlurNotification ({
 }
 
 module.exports = {
-  sendFlagNotification, sendSubscriptionNotification, sendSlurNotification,
+  sendFlagNotification,
+  sendInboxFlagNotification,
+  sendSubscriptionNotification,
+  sendSlurNotification,
 };

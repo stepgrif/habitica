@@ -15,48 +15,47 @@
         span.mr-1(v-if="msg.username") •
         span(v-b-tooltip="", :title="msg.timestamp | date") {{ msg.timestamp | timeAgo }}
       .text(v-html='atHighlight(parseMarkdown(msg.text))')
+      .reported(v-if="isMessageReported")
+        span(v-once) {{ $t('reportedMessage')}}
+        br
+        span(v-once) {{ $t('canDeleteNow') }}
       hr
       .d-flex(v-if='msg.id')
+        .action.d-flex.align-items-center(v-if='(inbox || (user.flags.communityGuidelinesAccepted && msg.uuid !== "system")) && !isMessageReported', @click='report(msg)')
+          .svg-icon(v-html="icons.report", v-once)
+          div(v-once) {{ $t('report') }}
         .action.d-flex.align-items-center(@click='remove()')
-          .svg-icon(v-html="icons.delete")
-          | {{$t('delete')}}
+          .svg-icon(v-html="icons.delete", v-once)
+          div(v-once) {{ $t('delete') }}
 </template>
-
-<style lang="scss">
-  .at-highlight {
-    background-color: rgba(213, 200, 255, 0.32);
-    padding: 0.1rem;
-  }
-
-  .at-text {
-    color: #6133b4;
-  }
-</style>
 
 <style lang="scss" scoped>
   @import '~client/assets/scss/colors.scss';
   @import '~client/assets/scss/tiers.scss';
 
-  .mentioned-icon {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: #bda8ff;
-    box-shadow: 0 1px 1px 0 rgba(26, 24, 29, 0.12);
-    position: absolute;
-    right: -.5em;
-    top: -.5em;
+  .action {
+    display: inline-block;
+    color: #878190;
+    margin-right: 1em;
+    font-size: 12px;
+
+    :hover {
+      cursor: pointer;
+    }
+
+    .svg-icon {
+      color: #A5A1AC;
+      margin-right: .2em;
+      width: 16px;
+    }
   }
 
-  .message-hidden {
-    margin-left: 1.5em;
-    margin-top: 1em;
-    color: red;
-  }
+  .active {
+    color: $purple-300;
 
-  hr {
-    margin-bottom: 0.5rem;
-    margin-top: 0.5rem;
+    .svg-icon {
+      color: $purple-400;
+    }
   }
 
   .card-body {
@@ -93,36 +92,37 @@
     }
   }
 
-  .action {
-    display: inline-block;
-    color: #878190;
-    margin-right: 1em;
-    font-size: 12px;
-
-    :hover {
-      cursor: pointer;
-    }
-
-    .svg-icon {
-      color: #A5A1AC;
-      margin-right: .2em;
-      width: 16px;
-    }
+  hr {
+    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
   }
 
-  .active {
-    color: $purple-300;
+  .mentioned-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #bda8ff;
+    box-shadow: 0 1px 1px 0 rgba(26, 24, 29, 0.12);
+    position: absolute;
+    right: -.5em;
+    top: -.5em;
+  }
 
-    .svg-icon {
-      color: $purple-400;
-    }
+  .message-hidden {
+    margin-left: 1.5em;
+    margin-top: 1em;
+    color: red;
+  }
+
+  .reported {
+    margin-top: 18px;
+    color: $red-50;
   }
 </style>
 
 <script>
   import axios from 'axios';
   import moment from 'moment';
-  import cloneDeep from 'lodash/cloneDeep';
   import escapeRegExp from 'lodash/escapeRegExp';
   import max from 'lodash/max';
 
@@ -134,8 +134,6 @@
 
   import deleteIcon from 'assets/svg/delete.svg';
   import copyIcon from 'assets/svg/copy.svg';
-  import likeIcon from 'assets/svg/like.svg';
-  import likedIcon from 'assets/svg/liked.svg';
   import reportIcon from 'assets/svg/report.svg';
   import tier1 from 'assets/svg/tier-1.svg';
   import tier2 from 'assets/svg/tier-2.svg';
@@ -154,11 +152,9 @@
     data () {
       return {
         icons: Object.freeze({
-          like: likeIcon,
           copy: copyIcon,
           report: reportIcon,
           delete: deleteIcon,
-          liked: likedIcon,
           tier1,
           tier2,
           tier3,
@@ -170,6 +166,7 @@
           tier9,
           tierNPC,
         }),
+        reported: false,
       };
     },
     filters: {
@@ -183,6 +180,9 @@
     },
     computed: {
       ...mapState({user: 'user.data'}),
+      isMessageReported () {
+        return this.msg.flags && this.msg.flags[this.user.id] || this.reported;
+      },
       isUserMentioned () {
         const message = this.msg;
         const user = this.user;
@@ -207,17 +207,6 @@
 
         return message.highlight;
       },
-      likeCount () {
-        const message = this.msg;
-        if (!message.likes) return 0;
-
-        let likeCount = 0;
-        for (let key in message.likes) {
-          let like = message.likes[key];
-          if (like) likeCount += 1;
-        }
-        return likeCount;
-      },
       tierIcon () {
         const message = this.msg;
         const isNPC = Boolean(message.backer && message.backer.npc);
@@ -232,33 +221,16 @@
       },
     },
     methods: {
-      async like () {
-        let message = cloneDeep(this.msg);
-
-        await this.$store.dispatch('chat:like', {
-          groupId: this.groupId,
-          chatId: message.id,
+      report () {
+        this.$root.$on('habitica:report-result', data => {
+          if (data.ok) {
+            this.reported = true;
+          }
+          this.$root.$off('habitica:report-result');
         });
-
-        if (!message.likes[this.user._id]) {
-          message.likes[this.user._id] = true;
-        } else {
-          message.likes[this.user._id] = !message.likes[this.user._id];
-        }
-
-        this.$emit('message-liked', message);
-        this.$root.$emit('bv::hide::tooltip');
-      },
-      likeTooltip (likedStatus) {
-        if (!likedStatus) return this.$t('like');
-      },
-      copyAsTodo (message) {
-        this.$root.$emit('habitica::copy-as-todo', message);
-      },
-      async report () {
         this.$root.$emit('habitica::report-chat', {
           message: this.msg,
-          groupId: this.groupId,
+          groupId: this.groupId || 'privateMessage',
         });
       },
       async remove () {
