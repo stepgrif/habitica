@@ -20,17 +20,16 @@ div
     .text(v-html='atHighlight(parseMarkdown(msg.text))')
     hr
     .d-flex(v-if='msg.id')
-      .action.d-flex.align-items-center(v-if='!inbox', @click='copyAsTodo(msg)')
+      .action.d-flex.align-items-center(@click='copyAsTodo(msg)')
         .svg-icon(v-html="icons.copy")
         div {{$t('copyAsTodo')}}
-      .action.d-flex.align-items-center(v-if='!inbox && user.flags.communityGuidelinesAccepted && msg.uuid !== "system"', @click='report(msg)')
+      .action.d-flex.align-items-center(v-if='user.flags.communityGuidelinesAccepted && msg.uuid !== "system"', @click='report(msg)')
         .svg-icon(v-html="icons.report")
         div {{$t('report')}}
-        // @TODO make flagging/reporting work in the inbox. NOTE: it must work even if the communityGuidelines are not accepted and it MUST work for messages that you have SENT as well as received. -- Alys
-      .action.d-flex.align-items-center(v-if='msg.uuid === user._id || inbox || user.contributor.admin', @click='remove()')
+      .action.d-flex.align-items-center(v-if='msg.uuid === user._id || user.contributor.admin', @click='remove()')
         .svg-icon(v-html="icons.delete")
         | {{$t('delete')}}
-      .ml-auto.d-flex(v-b-tooltip="{title: likeTooltip(msg.likes[user._id])}", v-if='!inbox')
+      .ml-auto.d-flex(v-b-tooltip="{title: likeTooltip(msg.likes[user._id])}")
         .action.d-flex.align-items-center.mr-0(@click='like()', v-if='likeCount > 0', :class='{active: msg.likes[user._id]}')
           .svg-icon(v-html="icons.liked", :title='$t("liked")')
           | +{{ likeCount }}
@@ -137,7 +136,6 @@ div
 </style>
 
 <script>
-import axios from 'axios';
 import moment from 'moment';
 import cloneDeep from 'lodash/cloneDeep';
 import escapeRegExp from 'lodash/escapeRegExp';
@@ -166,7 +164,7 @@ import tier9 from 'assets/svg/tier-staff.svg';
 import tierNPC from 'assets/svg/tier-npc.svg';
 
 export default {
-  props: ['msg', 'inbox', 'groupId'],
+  props: ['msg', 'groupId'],
   mixins: [styleHelper],
   data () {
     return {
@@ -283,11 +281,6 @@ export default {
 
       const message = this.msg;
       this.$emit('message-removed', message);
-
-      if (this.inbox) {
-        await axios.delete(`/api/v4/inbox/messages/${message.id}`);
-        return;
-      }
 
       await this.$store.dispatch('chat:deleteChat', {
         groupId: this.groupId,

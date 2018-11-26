@@ -21,7 +21,7 @@ export default {
   },
   methods: {
     action () {
-      this.$root.$emit('bv::show::modal', 'inbox-modal');
+      this.$root.$emit('bv::show::modal', 'messages-modal');
     },
   },
 };

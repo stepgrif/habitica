@@ -1,6 +1,6 @@
 <template lang="pug">
 div
-  inbox-modal
+  messages-modal
   creator-intro
   profile
   b-navbar.topbar.navbar-inverse.static-top.navbar-expand-lg(type="dark", :class="navbarZIndexClass")
@@ -343,7 +343,7 @@ import syncIcon from 'assets/svg/sync.svg';
 import svgHourglasses from 'assets/svg/hourglass.svg';
 import logo from 'assets/svg/logo.svg';
 
-import InboxModal from '../userMenu/inbox.vue';
+import messagesModal from '../messages/messages.vue';
 import notificationMenu from './notificationsDropdown';
 import creatorIntro from '../creatorIntro';
 import profile from '../userMenu/profile';
@@ -352,7 +352,7 @@ import userDropdown from './userDropdown';
 export default {
   components: {
     userDropdown,
-    InboxModal,
+    messagesModal,
     notificationMenu,
     creatorIntro,
     profile,

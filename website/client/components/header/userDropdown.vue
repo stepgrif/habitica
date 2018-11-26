@@ -99,7 +99,7 @@ export default {
     showInbox () {
       markPMSRead(this.user);
       axios.post('/api/v4/user/mark-pms-read');
-      this.$root.$emit('bv::show::modal', 'inbox-modal');
+      this.$root.$emit('bv::show::modal', 'messages-modal');
     },
     showProfile (startingPage) {
       this.$root.$emit('habitica:show-profile', {
