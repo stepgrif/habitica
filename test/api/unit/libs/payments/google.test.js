@@ -6,7 +6,7 @@ import iap from '../../../../../website/server/libs/inAppPurchases';
 import {model as User} from '../../../../../website/server/models/user';
 import common from '../../../../../website/common';
 import moment from 'moment';
-import mongoose from 'mongoose';
+import { mockFindById, restoreFindById } from '../../../../helpers/mongoose.helper';
 
 const i18n = common.i18n;
 
@@ -105,18 +105,7 @@ describe('Google Payments', ()  => {
       const receivingUser = new User();
       await receivingUser.save();
 
-      const mockFind = {
-        select () {
-          return this;
-        },
-        lean () {
-          return this;
-        },
-        exec () {
-          return Promise.resolve(receivingUser);
-        },
-      };
-      sinon.stub(mongoose.Model, 'findById').returns(mockFind);
+      mockFindById(receivingUser);
 
       const gift = {uuid: receivingUser._id};
       await googlePayments.verifyGemPurchase({user, gift, receipt, signature, headers});
@@ -137,6 +126,7 @@ describe('Google Payments', ()  => {
         amount: 5.25,
         headers,
       });
+      restoreFindById();
     });
   });
 
