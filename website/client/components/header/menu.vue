@@ -2,8 +2,8 @@
 div
   messages-modal
   creator-intro
-  report-flag-modal
   profileModal
+  report-flag-modal
   b-navbar.topbar.navbar-inverse.static-top.navbar-expand-lg(type="dark", :class="navbarZIndexClass")
     b-navbar-brand.brand
       .logo.svg-icon.d-none.d-xl-block(v-html="icons.logo")
@@ -358,8 +358,8 @@ export default {
     messagesModal,
     notificationMenu,
     creatorIntro,
-    reportFlagModal,
     profileModal,
+    reportFlagModal,
   },
   data () {
     return {

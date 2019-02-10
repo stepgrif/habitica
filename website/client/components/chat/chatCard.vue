@@ -11,7 +11,7 @@ div
       span(v-b-tooltip="", :title="msg.timestamp | date") {{ msg.timestamp | timeAgo }}&nbsp;
       span(v-if="msg.client && user.contributor.level >= 4")  ({{ msg.client }})
     .text(v-html='atHighlight(parseMarkdown(msg.text))')
-    .reported(v-if="isMessageReported")
+    .reported(v-if="isMessageReported && (inbox === true)")
       span(v-once) {{ $t('reportedMessage')}}
       br
       span(v-once) {{ $t('canDeleteNow') }}
@@ -139,8 +139,15 @@ import reportIcon from 'assets/svg/report.svg';
 import {highlightUsers} from '../../libs/highlightUsers';
 
 export default {
-  props: ['msg', 'inbox', 'groupId'],
   components: {userLink},
+  props: {
+    msg: {},
+    inbox: {
+      type: Boolean,
+      default: false,
+    },
+    groupId: {},
+  },
   data () {
     return {
       icons: Object.freeze({

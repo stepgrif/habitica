@@ -93,7 +93,16 @@ import copyAsTodoModal from './copyAsTodoModal';
 import chatCard from './chatCard';
 
 export default {
-  props: ['chat', 'groupType', 'groupId', 'groupName'],
+  props: {
+    chat: {},
+    inbox: {
+      type: Boolean,
+      default: false,
+    },
+    groupType: {},
+    groupId: {},
+    groupName: {},
+  },
   components: {
     copyAsTodoModal,
     chatCard,
