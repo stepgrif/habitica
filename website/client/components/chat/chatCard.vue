@@ -10,7 +10,7 @@ div
       span.mr-1(v-if="msg.username") •
       span(v-b-tooltip="", :title="msg.timestamp | date") {{ msg.timestamp | timeAgo }}&nbsp;
       span(v-if="msg.client && user.contributor.level >= 4")  ({{ msg.client }})
-    .text(v-html='atHighlight(parseMarkdown(msg.text))')
+    .text(v-html='atHighlight(parseMarkdown(msg.text))', ref='markdownContainer')
     .reported(v-if="isMessageReported && (inbox === true)")
       span(v-once) {{ $t('reportedMessage')}}
       br
@@ -48,7 +48,6 @@ div
 
 <style lang="scss" scoped>
   @import '~client/assets/scss/colors.scss';
-  @import '~client/assets/scss/tiers.scss';
 
   .mentioned-icon {
     width: 16px;
@@ -210,6 +209,16 @@ export default {
       return this.msg.flags && this.msg.flags[this.user.id] || this.reported;
     },
   },
+  mounted () {
+    const links = this.$refs.markdownContainer.getElementsByTagName('a');
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      links[i].onclick = (ev) => {
+        ev.preventDefault();
+        this.$router.push({ path: link.getAttribute('href')});
+      };
+    }
+  },
   methods: {
     async like () {
       let message = cloneDeep(this.msg);
@@ -263,7 +272,8 @@ export default {
       return highlightUsers(text, this.user.auth.local.username, this.user.profile.name);
     },
     parseMarkdown (text) {
-      return habiticaMarkdown.render(text);
+      const mdText = habiticaMarkdown.render(text);
+      return mdText;
     },
   },
 };

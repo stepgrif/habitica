@@ -18,6 +18,7 @@ import guildsAllowingBannedWords from '../../libs/guildsAllowingBannedWords';
 import { getMatchesByWordArray } from '../../libs/stringUtils';
 import bannedSlurs from '../../libs/bannedSlurs';
 import apiError from '../../libs/apiError';
+import {highlightMentions} from '../../libs/highlightMentions';
 
 const FLAG_REPORT_EMAILS = nconf.get('FLAG_REPORT_EMAIL').split(',').map((email) => {
   return { email, canSend: true };
@@ -89,7 +90,6 @@ function getBannedWordsFromText (message) {
 }
 
 
-const mentionRegex = new RegExp('\\B@[-\\w]+', 'g');
 /**
  * @api {post} /api/v3/groups/:groupId/chat Post chat message to a group
  * @apiName PostChat
@@ -182,11 +182,13 @@ api.postChat = {
       throw new NotAuthorized(res.t('messageGroupChatSpam'));
     }
 
+    const [message, mentions] = await highlightMentions(req.body.message);
     let client = req.headers['x-client'] || '3rd Party';
     if (client) {
       client = client.replace('habitica-', '');
     }
-    const newChatMessage = group.sendChat(req.body.message, user, null, client);
+
+    const newChatMessage = group.sendChat(message, user, null, client);
     let toSave = [newChatMessage.save()];
 
     if (group.type === 'party') {
@@ -205,7 +207,6 @@ api.postChat = {
       headers: req.headers,
     };
 
-    const mentions = req.body.message.match(mentionRegex);
     if (mentions) {
       analyticsObject.mentionsCount = mentions.length;
     } else {
