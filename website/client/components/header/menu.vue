@@ -345,6 +345,7 @@ import syncIcon from 'assets/svg/sync.svg';
 import svgHourglasses from 'assets/svg/hourglass.svg';
 import logo from 'assets/svg/logo.svg';
 
+import creatorIntro from '../creatorIntro';
 import messagesModal from '../messages/messages.vue';
 import notificationMenu from './notificationsDropdown';
 import profileModal from '../userMenu/profileModal';
