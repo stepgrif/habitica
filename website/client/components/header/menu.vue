@@ -4,6 +4,7 @@ div
   creator-intro
   profileModal
   report-flag-modal
+  send-gems-modal
   b-navbar.topbar.navbar-inverse.static-top.navbar-expand-lg(type="dark", :class="navbarZIndexClass")
     b-navbar-brand.brand
       .logo.svg-icon.d-none.d-xl-block(v-html="icons.logo")
@@ -346,20 +347,19 @@ import logo from 'assets/svg/logo.svg';
 
 import messagesModal from '../messages/messages.vue';
 import notificationMenu from './notificationsDropdown';
-import creatorIntro from '../creatorIntro';
 import profileModal from '../userMenu/profileModal';
-import userDropdown from './userDropdown';
-
 import reportFlagModal from '../chat/reportFlagModal';
+import sendGemsModal from 'client/components/payments/sendGemsModal';
+import userDropdown from './userDropdown';
 
 export default {
   components: {
-    userDropdown,
+    creatorIntro,
     messagesModal,
     notificationMenu,
-    creatorIntro,
     profileModal,
     reportFlagModal,
+    sendGemsModal,
   },
   data () {
     return {
