@@ -361,6 +361,7 @@ export default {
     profileModal,
     reportFlagModal,
     sendGemsModal,
+    userDropdown,
   },
   data () {
     return {
