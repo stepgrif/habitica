@@ -2,13 +2,12 @@
   b-modal#messages-modal(title="", :hide-footer="true", size='lg', @shown="onModalShown", @hide="onModalHide")
     .header-wrap.container.align-items-center(slot="modal-header")
       .row.align-items-center
-        .col-4
-          .row.align-items-center
-            .col-2
-              .svg-icon.envelope(v-html="icons.messageIcon")
-            .col-6
-              h2.text-center(v-once) {{ $t('messages') }}
-        .col-4.offset-3
+        .col-3.d-flex.align-items-center
+          .flex-fill.svg-icon.envelope(v-html="icons.messageIcon")
+          h2.flex-fill.text-center(v-once) {{ $t('messages') }}
+          button.flex-fill.btn.btn-secondary.new-message-button
+            .svg-icon.positive-icon(v-html="icons.positiveIcon")
+        .col-4.offset-4
           toggle-switch.float-right(
             :label="optTextSet.switchDescription",
             :checked="!this.user.inbox.optOut"
@@ -21,7 +20,7 @@
     .row
       .col-3.sidebar
         .search-section
-          b-form-input(:placeholder="$t('search')", v-model='search')
+          b-form-input.input-search(:placeholder="$t('search')", v-model='search')
         .empty-messages.text-center(v-if='filtersConversations.length === 0')
           .svg-icon.envelope(v-html="icons.messageIcon")
           h4(v-once) {{$t('emptyMessagesLine1')}}
@@ -83,6 +82,11 @@
   @import '~client/assets/scss/colors.scss';
   @import '~client/assets/scss/tiers.scss';
 
+  .container {
+    margin-left: 0px;
+    max-width: 100rem;
+  }
+
   .conversations {
     max-height: 35rem;
     overflow-x: hidden;
@@ -120,8 +124,9 @@
   }
 
   .envelope {
-    color: $gray-400 !important;
+    color: $gray-500 !important;
     margin: 0;
+    max-width: 2rem;
   }
 
   h3 {
@@ -135,8 +140,6 @@
   }
 
   .header-wrap {
-    padding: 0.5em;
-
     h2 {
       margin: 0;
       line-height: 1;
@@ -156,6 +159,16 @@
     @media (min-width: 992px) {
       overflow-x: hidden;
       overflow-y: scroll;
+    }
+  }
+
+  .new-message-button {
+    padding: 1rem;
+    max-width: 2.8rem;
+
+    .positive-icon {
+      color: $purple-300;
+      width: 10px;
     }
   }
 
@@ -240,6 +253,7 @@
 
   import privateMessages from './messageList';
   import messageIcon from 'assets/svg/message.svg';
+  import positiveIcon from 'assets/svg/positive.svg';
   import svgClose from 'assets/svg/close.svg';
   import tier1 from 'assets/svg/tier-1.svg';
   import tier2 from 'assets/svg/tier-2.svg';
@@ -295,6 +309,7 @@
       return {
         icons: Object.freeze({
           messageIcon,
+          positiveIcon,
           svgClose,
           tier1,
           tier2,
