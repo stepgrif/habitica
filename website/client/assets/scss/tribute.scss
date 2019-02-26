@@ -1,0 +1,61 @@
+@import '~client/assets/scss/colors.scss';
+
+.tribute-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto;
+  max-height: 400px;
+  max-width: 600px;
+  overflow: auto;
+  display: block;
+  z-index: 999999;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(#000, 0.13);
+}
+.tribute-container ul {
+  margin: 0;
+  margin-top: 2px;
+  padding: 0;
+  list-style: none;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid rgba(#000, 0.13);
+  background-clip: padding-box;
+  overflow: hidden;
+  transition: none;
+}
+
+.tribute-container li {
+  color: $gray-200;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: none;
+}
+
+.tribute-container li.highlight,
+.tribute-container li:hover {
+  background-color: rgba(213, 200, 255, 0.32);
+  color: $purple-300;
+}
+
+.tribute-container li span {
+  font-weight: bold;
+}
+
+.tribute-container li.no-match {
+  cursor: default;
+}
+
+.profile-name {
+  display: inline-block;
+  font-size: 16px;
+  margin-bottom: 0rem;
+}
+
+.tier-svg-icon {
+  width: 10px;
+  display: inline-block;
+  margin-left: .5em;
+}

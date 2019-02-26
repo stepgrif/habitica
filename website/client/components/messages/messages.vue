@@ -5,9 +5,18 @@
         .col-3.d-flex.align-items-center
           .flex-fill.svg-icon.envelope(v-html="icons.messageIcon")
           h2.flex-fill.text-center(v-once) {{ $t('messages') }}
-          button.flex-fill.btn.btn-secondary.new-message-button
+          button.flex-fill.btn.btn-secondary.new-message-button(@click="toggleUserSearch")
             .svg-icon.positive-icon(v-html="icons.positiveIcon")
-        .col-4.offset-4
+        .col-4
+          .d-flex.align-items-center(v-if='userSearchOpen')
+            strong.mr-3 {{ $t('to') }}
+            vue-tribute(:options="autocompleteOptions", v-on:tribute-replaced='autocompleteReplaced')
+              b-form-input.user-search(
+                v-model="userSearch",
+                @click="checkAt",
+                @input="checkAt",
+              )
+        .col-4
           toggle-switch.float-right(
             :label="optTextSet.switchDescription",
             :checked="!this.user.inbox.optOut"
@@ -63,6 +72,8 @@
 </template>
 
 <style lang='scss'>
+  @import '~client/assets/scss/tribute.scss';
+
   #messages-modal___BV_modal_outer_ {
     .modal-body {
       padding: 0rem 0.75rem;
@@ -238,11 +249,17 @@
     display: inline-block;
     margin-left: 1em;
   }
+
+  .user-search {
+    width: 18rem;
+  }
 </style>
 
 <script>
   import Vue from 'vue';
+  import VueTribute from 'vue-tribute';
   import moment from 'moment';
+  import debounce from 'lodash/debounce';
   import filter from 'lodash/filter';
   import sortBy from 'lodash/sortBy';
   import groupBy from 'lodash/groupBy';
@@ -271,6 +288,7 @@
     components: {
       privateMessages,
       toggleSwitch,
+      VueTribute,
     },
     mounted () {
       this.$root.$on('habitica::new-private-message', (data) => {
@@ -325,11 +343,34 @@
         displayCreate: true,
         selectedConversation: {},
         search: '',
+        userSearch: '@',
         newMessage: '',
         showPopover: false,
         messages: [],
         loaded: false,
         initiatedConversation: null,
+        userSearchOpen: false,
+        autocompleteOptions: {
+          values: debounce(async (text, cb) => {
+            if (text.length > 0) {
+              let suggestions = await axios.get(`/api/v4/members/find/${text}`);
+              cb(suggestions.data.data);
+            } else {
+              cb([]);
+            }
+          }, 200),
+          requireLeadingSpace: false,
+          selectTemplate (item) {
+            return item;
+          },
+          lookup (item) {
+            return item.auth.local.username;
+          },
+          menuItemTemplate (item) {
+            let userTierClass = styleHelper.methods.userLevelStyle(item.original);
+            return `<h3 class='profile-name ${userTierClass}'> ${item.original.profile.name}</h3> @${item.string}`;
+          },
+        },
       };
     },
     filters: {
@@ -452,6 +493,8 @@
         this.messages = [];
         this.loaded = false;
         this.initiatedConversation = null;
+        this.userSearch = '@';
+        this.userSearchOpen = false;
       },
       messageRemoved (message) {
         const messageIndex = this.messages.findIndex(msg => msg.id === message.id);
@@ -519,6 +562,25 @@
         });
 
         this.newMessage = '';
+      },
+      toggleUserSearch () {
+        this.userSearchOpen = !this.userSearchOpen;
+      },
+      autocompleteReplaced (e) {
+        this.$root.$emit('habitica::new-private-message', {
+          userIdToMessage: e.detail.item.original._id,
+          displayName: e.detail.item.original.profile.name,
+          username: e.detail.item.original.auth.local.username,
+          backer: e.detail.item.original.backer,
+          contributor: e.detail.item.original.contributor,
+        });
+        this.userSearchOpen = false;
+        this.userSearch = '@';
+      },
+      checkAt () {
+        if (this.userSearch.indexOf('@') === -1) {
+          this.userSearch = `@${this.userSearch}`;
+        }
       },
       close () {
         this.$root.$emit('bv::hide::modal', 'messages-modal');
