@@ -1,7 +1,7 @@
 <template lang="pug">
 .standard-sidebar.d-none.d-sm-block
   .form-group
-    input.form-control.search(type="text", :placeholder="$t('search')", v-model='searchTerm')
+    input.form-control.input-search(type="text", :placeholder="$t('search')", v-model='searchTerm')
   form
     h2(v-once) {{ $t('filter') }}
     .form-group
