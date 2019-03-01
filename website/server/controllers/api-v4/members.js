@@ -44,7 +44,7 @@ api.flagPrivateMessage = {
 api.getUsernameAutocompletes = {
   method: 'GET',
   url: '/members/find/:username',
-  middlewares: [],
+  middlewares: [authWithHeaders()],
   async handler (req, res) {
     res.set('Cache-Control', 'public, max-age=300000'); // 5 minutes
     req.checkParams('username', res.t('invalidReqParams')).notEmpty();
@@ -66,16 +66,17 @@ api.getUsernameAutocompletes = {
     let id = req.query.id;
     if (context && id) {
       if (context === 'party') {
-        query['party._id'] = id;
+        query['party._id'] = res.locals.user.party._id;
       } else if (context === 'privateGuild') {
-        query.guilds = id;
+        if (res.locals.user.guilds.includes(id)) {
+          query.guilds = id;
+        }
       }
     }
-
     let members = await User
       .find(query)
       .select(['profile.name', 'contributor', 'auth.local.username'])
-      .limit(20)
+      .limit(5)
       .exec();
 
     res.respond(200, members);
