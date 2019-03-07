@@ -3,7 +3,7 @@ import { authWithHeaders } from '../../middlewares/auth';
 let api = {};
 
 // @TODO export this const, cannot export it from here because only routes are exported from controllers
-const LAST_ANNOUNCEMENT_TITLE = 'NEW DISCOUNTED PET QUEST BUNDLE: MYTHICAL MARVELS!';
+const LAST_ANNOUNCEMENT_TITLE = 'MARCH BACKGROUNDS AND ARMOIRE ITEMS!';
 const worldDmg = { // @TODO
   bailey: false,
 };
@@ -30,14 +30,14 @@ api.getNews = {
           <div class="mr-3 ${baileyClass}"></div>
           <div class="media-body">
             <h1 class="align-self-center">${res.t('newStuff')}</h1>
-            <h2>2/19/2019 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
+            <h2>3/5/2019 - ${LAST_ANNOUNCEMENT_TITLE}</h2>
           </div>
         </div>
         <hr/>
-        <div class="promo_mythical_marvels_bundle center-block"></div>
-        <p>If you're looking to add some magical pets to your Habitica stable, you're in luck! From now until February 28, you can purchase the Mythical Marvels Pet Quest Bundle and receive the Gryphon, Sea Serpent, and Unicorn quests, all for only 7 Gems! That's a discount of 5 Gems from the price of purchasing them separately. Check it out in the <a href='/shops/quests'>Quest Shop</a> today!</p>
-        <div class="small">Art by greenpencil, UncommonCriminal, RosieSully, Lukreja, Baconsaur, Witticaster, Aries Faries, Mara, Seraphina, 1920-kun, RBrinks, and Erikari</div>
-        <div class="small mb-3">Writing by Laurel, Daniel the Bard, and gwyllgi</div>
+        <div class="promo_armoire_backgrounds_201903 center-block"></div>
+        <p>We’ve added three new backgrounds to the Background Shop! Now your avatar can feed the birds at the Duck Pond, browse the Flower Market and go on the hunt for Spring goodies in a Field with Colored Eggs. Check them out under User Icon > Backgrounds!</p>
+        <p>Plus, there’s new Gold-purchasable equipment in the Enchanted Armoire, including the Vernal Vestment set. Better work hard on your real-life tasks to earn all the pieces! Enjoy :)</p>
+        <div class="small mb-3">by AnneDeLune, GeraldThePixel, QuartzFox, Vikte, gawrone, astigmatism, and SabreCat</div>
       </div>
       `,
     });

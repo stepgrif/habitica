@@ -8,16 +8,16 @@ const featuredItems = {
       path: 'armoire',
     },
     {
-      type: 'premiumHatchingPotion',
-      path: 'premiumHatchingPotions.Cupid',
+      type: 'hatchingPotions',
+      path: 'hatchingPotions.Golden',
     },
     {
-      type: 'premiumHatchingPotion',
-      path: 'premiumHatchingPotions.RoseQuartz',
+      type: 'eggs',
+      path: 'eggs.PandaCub',
     },
     {
       type: 'card',
-      path: 'cardTypes.valentine',
+      path: 'cardTypes.goodluck',
     },
   ],
   quests: [
