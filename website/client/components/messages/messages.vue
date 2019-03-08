@@ -5,9 +5,9 @@
         .col-3.d-flex.align-items-center
           .flex-fill.svg-icon.envelope(v-html="icons.messageIcon")
           h2.flex-fill.text-center(v-once) {{ $t('messages') }}
-          button.flex-fill.btn.btn-secondary.new-message-button(@click="toggleUserSearch")
+          button.flex-fill.btn.btn-secondary.new-message-button(v-if="!user.flags.chatRevoked", @click="toggleUserSearch")
             .svg-icon.positive-icon(v-html="icons.positiveIcon")
-        .col-4
+        .col-5
           .d-flex.align-items-center(v-if='userSearchOpen')
             strong.mr-3 {{ $t('to') }}
             vue-tribute(:options="autocompleteOptions", v-on:tribute-replaced='autocompleteReplaced')
@@ -15,8 +15,10 @@
                 v-model="userSearch",
                 @click="checkAt",
                 @input="checkAt",
+                v-on:keyup.enter.stop.prevent="immediateSearch",
               )
-        .col-4
+            .input-error.ml-3(v-if='userNotFound') {{ $t('userNotFound') }}
+        .col-3
           toggle-switch.float-right(
             :label="optTextSet.switchDescription",
             :checked="!this.user.inbox.optOut"
@@ -27,10 +29,10 @@
           .close
             span.svg-icon.inline.icon-10(aria-hidden="true", v-html="icons.svgClose", @click="close()")
     .row
-      .col-3.sidebar
+      .col-3.sidebar.d-flex.flex-column
         .search-section
           b-form-input.input-search(:placeholder="$t('search')", v-model='search')
-        .empty-messages.text-center(v-if='filtersConversations.length === 0')
+        .empty-messages.text-center.m-auto(v-if='filtersConversations.length === 0')
           .svg-icon.envelope(v-html="icons.messageIcon")
           h4(v-once) {{$t('emptyMessagesLine1')}}
           p(v-if="!user.flags.chatRevoked") {{$t('emptyMessagesLine2')}}
@@ -44,13 +46,14 @@
               span.mr-1(v-if='conversation.username') @{{ conversation.username }} •
               span {{ conversation.date | timeAgo }}
             div {{conversation.lastMessageText ? conversation.lastMessageText.substring(0, 30) : ''}}
-      .col-9.messages.d-flex.flex-column.justify-content-between
-        .empty-messages.text-center(v-if='!selectedConversation.key')
+      .col-9.messages.d-flex.flex-column.align-items-center
+        .empty-messages.text-center.m-auto(v-if='!selectedConversation.key')
           .svg-icon.envelope(v-html="icons.messageIcon")
           h4 {{placeholderTexts.title}}
           p(v-html="placeholderTexts.description")
-        .empty-messages.text-center(v-if='selectedConversation.key && selectedConversationMessages.length === 0')
-          p {{ $t('beginningOfConversation', {userName: selectedConversation.name})}}
+        .empty-messages.text-center.mt-auto(v-if='selectedConversation.key && selectedConversationMessages.length === 0')
+          h3 {{ $t('beginningOfConversation', {userName: selectedConversation.name})}}
+          p {{ $t('beginningOfConversationReminder') }}
         private-messages.message-scroll(
           v-if="selectedConversation.messages && selectedConversationMessages.length > 0",
           :chat='selectedConversationMessages',
@@ -74,7 +77,7 @@
 <style lang='scss'>
   @import '~client/assets/scss/tribute.scss';
 
-  #messages-modal___BV_modal_outer_ {
+  #messages-modal {
     .modal-body {
       padding: 0rem 0.75rem;
     }
@@ -101,7 +104,7 @@
   .conversations {
     max-height: 35rem;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 
   .conversation {
@@ -119,18 +122,18 @@
   }
 
   .empty-messages {
-    margin-top: 10em;
-    color: $gray-400;
-    padding: 1em;
+    h3, h4, p {
+      color: $gray-200;
+      margin: 0px;
+    }
 
-    h4 {
-      color: $gray-400;
-      margin-top: 1em;
+    p {
+      font-size: 12px;
     }
 
     .envelope {
       width: 30px;
-      margin: 0 auto;
+      margin: 0 auto 0.5rem;
     }
   }
 
@@ -158,7 +161,6 @@
   }
 
   .messages {
-    position: relative;
     padding: 0rem;
   }
 
@@ -185,12 +187,11 @@
 
   .new-message-row {
     background-color: $gray-700;
-    position: absolute;
-    bottom: 0;
     height: 88px;
     width: 100%;
     padding: 1em;
     border-bottom-right-radius: 3px;
+    margin: auto 0rem 0rem 0rem;
 
     textarea {
       height: 80%;
@@ -252,6 +253,12 @@
 
   .user-search {
     width: 18rem;
+  }
+
+  .input-error {
+    color: $red-50;
+    font-size: 90%;
+    width: 100%;
   }
 </style>
 
@@ -350,6 +357,7 @@
         loaded: false,
         initiatedConversation: null,
         userSearchOpen: false,
+        userNotFound: false,
         autocompleteOptions: {
           values: debounce(async (text, cb) => {
             if (text.length > 0) {
@@ -495,6 +503,7 @@
         this.initiatedConversation = null;
         this.userSearch = '@';
         this.userSearchOpen = false;
+        this.selectedConversation = {};
       },
       messageRemoved (message) {
         const messageIndex = this.messages.findIndex(msg => msg.id === message.id);
@@ -565,6 +574,7 @@
       },
       toggleUserSearch () {
         this.userSearchOpen = !this.userSearchOpen;
+        this.userNotFound = false;
       },
       autocompleteReplaced (e) {
         this.$root.$emit('habitica::new-private-message', {
@@ -578,8 +588,24 @@
         this.userSearch = '@';
       },
       checkAt () {
+        this.userNotFound = false;
         if (this.userSearch.indexOf('@') === -1) {
           this.userSearch = `@${this.userSearch}`;
+        }
+      },
+      async immediateSearch () {
+        if (this.userSearch === '@') return;
+        const res = await axios.get(`/api/v4/members/username/${this.userSearch}`);
+        if (res.status === 200) {
+          return this.$root.$emit('habitica::new-private-message', {
+            userIdToMessage: res.data.data._id,
+            displayName: res.data.data.profile.name,
+            username: res.data.data.auth.local.username,
+            backer: res.data.data.backer,
+            contributor: res.data.data.contributor,
+          });
+        } else {
+          this.userNotFound = true;
         }
       },
       close () {
