@@ -575,6 +575,7 @@
       toggleUserSearch () {
         this.userSearchOpen = !this.userSearchOpen;
         this.userNotFound = false;
+        if (this.userSearchOpen) this.selectedConversation = {};
       },
       autocompleteReplaced (e) {
         this.$root.$emit('habitica::new-private-message', {
