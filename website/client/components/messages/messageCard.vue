@@ -2,14 +2,7 @@
   div
     .mentioned-icon(v-if='isUserMentioned')
     .card-body
-      h3.leader(
-        :class='userLevelStyle(msg)',
-        @click="showMemberModal(msg.uuid)",
-        v-b-tooltip.hover.top="tierTitle",
-        v-if="msg.user"
-      )
-        | {{msg.user}}
-        .svg-icon(v-html="tierIcon")
+      user-link(:userId="msg.uuid", :name="msg.user", :backer="msg.backer", :contributor="msg.contributor")
       p.time
         span.mr-1(v-if="msg.username") @{{ msg.username }}
         span.mr-1(v-if="msg.username") •
@@ -21,7 +14,7 @@
         span(v-once) {{ $t('canDeleteNow') }}
       hr
       .d-flex(v-if='msg.id')
-        .action.d-flex.align-items-center(v-if='(inbox || (user.flags.communityGuidelinesAccepted && msg.uuid !== "system")) && !isMessageReported', @click='report(msg)')
+        .action.d-flex.align-items-center(v-if='user.flags.communityGuidelinesAccepted && msg.uuid !== "system" && !isMessageReported', @click='report(msg)')
           .svg-icon(v-html="icons.report", v-once)
           div(v-once) {{ $t('report') }}
         .action.d-flex.align-items-center(@click='remove()')
@@ -129,6 +122,7 @@
   import habiticaMarkdown from 'habitica-markdown';
   import { mapState } from 'client/libs/store';
   import styleHelper from 'client/mixins/styleHelper';
+  import userLink from '../userLink';
 
   import achievementsLib from '../../../common/script/libs/achievements';
 
@@ -149,6 +143,7 @@
   export default {
     props: ['msg', 'groupId'],
     mixins: [styleHelper],
+    components: {userLink},
     data () {
       return {
         icons: Object.freeze({
