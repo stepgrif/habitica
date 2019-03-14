@@ -1,35 +1,31 @@
 <template lang="pug">
   b-modal#messages-modal(title="", :hide-footer="true", size='lg', @shown="onModalShown", @hide="onModalHide")
-    .header-wrap.container.align-items-center(slot="modal-header")
-      .row.align-items-center
-        .col-3.d-flex.align-items-center
-          .flex-fill.svg-icon.envelope(v-html="icons.messageIcon")
-          h2.flex-fill.text-center(v-once) {{ $t('messages') }}
-          button.flex-fill.btn.btn-secondary.new-message-button(v-if="!user.flags.chatRevoked", @click="toggleUserSearch")
-            .svg-icon.positive-icon(v-html="icons.positiveIcon")
-        .col-5
-          .d-flex.align-items-center(v-if='userSearchOpen')
-            strong.mr-3 {{ $t('to') }}
-            vue-tribute(:options="autocompleteOptions", v-on:tribute-replaced='autocompleteReplaced')
-              b-form-input.user-search(
-                v-model="userSearch",
-                @click="checkAt",
-                @input="checkAt",
-                v-on:keyup.enter.stop.prevent="immediateSearch",
-              )
-            .input-error.ml-3(v-if='userNotFound') {{ $t('userNotFound') }}
-        .col-3
-          toggle-switch.float-right(
-            :label="optTextSet.switchDescription",
-            :checked="!this.user.inbox.optOut"
-            :hoverText="optTextSet.popoverText",
-            @change="toggleOpt()"
+    .d-flex.w-100.align-items-center(slot="modal-header")
+      .d-flex.align-items-center.w-25
+        .svg-icon.envelope.ml-3(v-html="icons.messageIcon")
+        h2.flex-fill.text-center.pr-3(v-once) {{ $t('messages') }}
+        button.btn.btn-secondary.new-message-button(v-if="!user.flags.chatRevoked", @click="toggleUserSearch")
+          .svg-icon.positive-icon(v-html="icons.positiveIcon")
+      .d-flex.align-items-center.w-50.flex-wrap(v-if='userSearchOpen')
+        strong.ml-3.mr-3 {{ $t('to') }}
+        vue-tribute.w-50(:options="autocompleteOptions", v-on:tribute-replaced='autocompleteReplaced')
+          b-form-input(
+            v-model="userSearch",
+            @click="checkAt",
+            @input="checkAt",
+            v-on:keyup.enter.stop.prevent="immediateSearch",
           )
-        .col-1
-          .close
-            span.svg-icon.inline.icon-10(aria-hidden="true", v-html="icons.svgClose", @click="close()")
-    .row
-      .col-3.sidebar.d-flex.flex-column
+        .input-error.ml-3(v-if='userNotFound') {{ $t('userNotFound') }}
+      .d-flex.align-items-center.flex-row-reverse.w-25.ml-auto
+        .svg-icon.close(aria-hidden="true", v-html="icons.svgClose", @click="close()")
+        toggle-switch(
+          :label="optTextSet.switchDescription",
+          :checked="!this.user.inbox.optOut"
+          :hoverText="optTextSet.popoverText",
+          @change="toggleOpt()"
+        )
+    .d-flex
+      .w-25.sidebar.d-flex.flex-column
         .search-section
           b-form-input.input-search(:placeholder="$t('search')", v-model='search')
         .empty-messages.text-center.m-auto(v-if='filtersConversations.length === 0')
@@ -46,7 +42,7 @@
               span.mr-1(v-if='conversation.username') @{{ conversation.username }} •
               span {{ conversation.date | timeAgo }}
             div {{conversation.lastMessageText ? conversation.lastMessageText.substring(0, 30) : ''}}
-      .col-9.messages.d-flex.flex-column.align-items-center
+      .w-75.messages.d-flex.flex-column.align-items-center
         .empty-messages.text-center.m-auto(v-if='!selectedConversation.key')
           .svg-icon.envelope(v-html="icons.messageIcon")
           h4 {{placeholderTexts.title}}
@@ -78,8 +74,12 @@
   @import '~client/assets/scss/tribute.scss';
 
   #messages-modal {
+    h2 {
+      margin-bottom: 0rem;
+    }
+
     .modal-body {
-      padding: 0rem 0.75rem;
+      padding: 0rem;
     }
 
     .modal-content {
@@ -89,17 +89,24 @@
     .modal-dialog {
       margin: 10vh 15vw 0rem;
     }
+
+    .modal-header {
+      padding: 1rem 0rem;
+
+      .close {
+        cursor: pointer;
+        margin: 0rem 1.5rem;
+        min-width: 0.75rem;
+        padding: 0rem;
+        width: 0.75rem;
+      }
+    }
   }
 </style>
 
 <style lang="scss" scoped>
   @import '~client/assets/scss/colors.scss';
   @import '~client/assets/scss/tiers.scss';
-
-  .container {
-    margin-left: 0px;
-    max-width: 100rem;
-  }
 
   .conversations {
     max-height: 35rem;
@@ -150,13 +157,6 @@
       width: 10px;
       display: inline-block;
       margin-left: .5em;
-    }
-  }
-
-  .header-wrap {
-    h2 {
-      margin: 0;
-      line-height: 1;
     }
   }
 
@@ -251,14 +251,9 @@
     margin-left: 1em;
   }
 
-  .user-search {
-    width: 18rem;
-  }
-
   .input-error {
     color: $red-50;
     font-size: 90%;
-    width: 100%;
   }
 </style>
 
