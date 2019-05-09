@@ -8,16 +8,16 @@ const featuredItems = {
       path: 'armoire',
     },
     {
-      type: 'hatchingPotions',
-      path: 'hatchingPotions.Golden',
+      type: 'eggs',
+      path: 'eggs.Dragon',
     },
     {
-      type: 'eggs',
-      path: 'eggs.PandaCub',
+      type: 'hatchingPotions',
+      path: 'hatchingPotions.Red',
     },
     {
       type: 'card',
-      path: 'cardTypes.goodluck',
+      path: 'cardTypes.congrats',
     },
   ],
   quests: [
@@ -27,14 +27,14 @@ const featuredItems = {
     },
     {
       type: 'quests',
-      path: 'quests.sabretooth',
+      path: 'quests.egg',
     },
     {
       type: 'quests',
       path: 'quests.rock',
     },
   ],
-  seasonal: '',
+  seasonal: 'spring2018Healer',
   timeTravelers: [
     // TODO
   ],

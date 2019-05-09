@@ -88,7 +88,8 @@
               :clearButtonText='$t("clear")',
               :todayButton='!challengeAccessRequired',
               :todayButtonText='$t("today")',
-              :disabled-picker='challengeAccessRequired'
+              :disabled-picker='challengeAccessRequired',
+              :highlighted='calendarHighlights'
             )
         .option(v-if="task.type === 'daily'")
           .form-group
@@ -99,7 +100,8 @@
               :clearButton="false",
               :todayButton="!challengeAccessRequired",
               :todayButtonText="$t('today')",
-              :disabled-picker="challengeAccessRequired"
+              :disabled-picker="challengeAccessRequired",
+              :highlighted='calendarHighlights'
             )
         .option(v-if="task.type === 'daily'")
           .form-group
@@ -162,6 +164,15 @@
                 | {{ $t(frequency) }}
 
         .option.group-options(v-if='groupId')
+          .form-group(v-if="task.type === 'todo'")
+            label(v-once) {{ $t('sharedCompletion') }}
+            b-dropdown.inline-dropdown(:text="$t(sharedCompletion)")
+              b-dropdown-item(
+                v-for="completionOption in ['recurringCompletion', 'singleCompletion', 'allAssignedCompletion']",
+                :key="completionOption",
+                @click="sharedCompletion = completionOption",
+                :class="{active: sharedCompletion === completionOption}"
+              ) {{ $t(completionOption) }}
           .form-group.row
             label.col-12(v-once) {{ $t('assignedTo') }}
             .col-12.mt-2
@@ -182,23 +193,12 @@
 
                   .row
                     button.btn.btn-primary(@click.stop.prevent="showAssignedSelect = !showAssignedSelect") {{$t('close')}}
-
-        .option.group-options(v-if='groupId')
           .form-group
             label(v-once) {{ $t('approvalRequired') }}
             toggle-switch.d-inline-block(
               :checked="requiresApproval",
               @change="updateRequiresApproval"
             )
-          .form-group(v-if="task.type === 'todo'")
-            label(v-once) {{ $t('sharedCompletion') }}
-            b-dropdown.inline-dropdown(:text="$t(sharedCompletion)")
-              b-dropdown-item(
-                v-for="completionOption in ['recurringCompletion', 'singleCompletion', 'allAssignedCompletion']",
-                :key="completionOption",
-                @click="sharedCompletion = completionOption",
-                :class="{active: sharedCompletion === completionOption}"
-              ) {{ $t(completionOption) }}
 
         .advanced-settings(v-if="task.type !== 'reward'")
           .advanced-settings-toggle.d-flex.justify-content-between.align-items-center(@click = "showAdvancedOptions = !showAdvancedOptions")
@@ -262,6 +262,10 @@
 
     label {
       font-weight: bold;
+    }
+
+    .input-group > * {
+      height: 40px;
     }
 
     input, textarea {
@@ -359,8 +363,8 @@
       margin-top: 12px;
       position: relative;
 
-      label {
-        max-height: 30px;
+      .custom-control-label p {
+        word-break: break-word;
       }
     }
 
@@ -710,7 +714,7 @@ export default {
         calendar: calendarIcon,
       }),
       requiresApproval: false, // We can't set task.group fields so we use this field to toggle
-      sharedCompletion: 'recurringCompletion',
+      sharedCompletion: 'singleCompletion',
       members: [],
       memberNamesById: {},
       assignedMembers: [],
@@ -722,6 +726,7 @@ export default {
         con: 'constitution',
         per: 'perception',
       },
+      calendarHighlights: { dates: [new Date()]},
     };
   },
   mounted () {
@@ -840,7 +845,7 @@ export default {
         });
         this.assignedMembers = [];
         if (this.task.group && this.task.group.assignedUsers) this.assignedMembers = this.task.group.assignedUsers;
-        if (this.task.group) this.sharedCompletion = this.task.group.sharedCompletion || 'recurringCompletion';
+        if (this.task.group) this.sharedCompletion = this.task.group.sharedCompletion || 'singleCompletion';
       }
 
       // @TODO: This whole component is mutating a prop and that causes issues. We need to not copy the prop similar to group modals
@@ -924,7 +929,6 @@ export default {
 
       // TODO Fix up permissions on task.group so we don't have to keep doing these hacks
       if (this.groupId) {
-        this.task.group.assignedUsers = this.assignedMembers;
         this.task.requiresApproval = this.requiresApproval;
         this.task.group.approval.required = this.requiresApproval;
         this.task.sharedCompletion = this.sharedCompletion;
@@ -952,6 +956,7 @@ export default {
             });
           });
           Promise.all(promises);
+          this.task.group.assignedUsers = this.assignedMembers;
           this.$emit('taskCreated', this.task);
         } else {
           this.createTask(this.task);

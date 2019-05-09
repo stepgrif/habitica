@@ -20,13 +20,13 @@ div
       .action.d-flex.align-items-center(@click='copyAsTodo(msg)')
         .svg-icon(v-html="icons.copy")
         div {{$t('copyAsTodo')}}
-      .action.d-flex.align-items-center(v-if='user.flags.communityGuidelinesAccepted && msg.uuid !== "system" && !isMessageReported', @click='report(msg)')
-        .svg-icon(v-html="icons.report")
-        div {{$t('report')}}
-      .action.d-flex.align-items-center(v-if='msg.uuid === user._id || user.contributor.admin', @click='remove()')
-        .svg-icon(v-html="icons.delete")
-        | {{$t('delete')}}
-      .ml-auto.d-flex(v-b-tooltip="{title: likeTooltip(msg.likes[user._id])}")
+      .action.d-flex.align-items-center(v-if='(inbox || (user.flags.communityGuidelinesAccepted && msg.uuid !== "system")) && (!isMessageReported || user.contributor.admin)', @click='report(msg)')
+        .svg-icon(v-html="icons.report", v-once)
+        div(v-once) {{$t('report')}}
+      .action.d-flex.align-items-center(v-if='msg.uuid === user._id || inbox || user.contributor.admin', @click='remove()')
+        .svg-icon(v-html="icons.delete", v-once)
+        div(v-once) {{$t('delete')}}
+      .ml-auto.d-flex(v-b-tooltip="{title: likeTooltip(msg.likes[user._id])}", v-if='!inbox')
         .action.d-flex.align-items-center.mr-0(@click='like()', v-if='likeCount > 0', :class='{active: msg.likes[user._id]}')
           .svg-icon(v-html="icons.liked", :title='$t("liked")')
           | +{{ likeCount }}
@@ -274,8 +274,8 @@ export default {
       return highlightUsers(text, this.user.auth.local.username, this.user.profile.name);
     },
     parseMarkdown (text) {
-      const mdText = habiticaMarkdown.render(text);
-      return mdText;
+      if (!text) return;
+      return habiticaMarkdown.render(String(text));
     },
   },
 };

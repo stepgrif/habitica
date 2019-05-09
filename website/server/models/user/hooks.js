@@ -124,28 +124,11 @@ function _setUpNewUser (user) {
   let taskTypes;
   let iterableFlags = user.flags.toObject();
 
-  /* eslint-disable camelcase */
   user.items.quests.dustbunnies = 1;
+  user.markModified('items.quests');
+
   user.purchased.background.violet = true;
   user.preferences.background = 'violet';
-  user.items.gear.owned.shield_special_piDay = true;
-  user.items.gear.equipped.shield = 'shield_special_piDay';
-  user.items.gear.costume.shield = 'shield_special_piDay';
-  user.items.gear.owned.head_special_piDay = true;
-  user.items.gear.equipped.head = 'head_special_piDay';
-  user.items.gear.costume.head = 'head_special_piDay';
-  user.items.food.Pie_Skeleton = 1;
-  user.items.food.Pie_Base = 1;
-  user.items.food.Pie_CottonCandyBlue = 1;
-  user.items.food.Pie_CottonCandyPink = 1;
-  user.items.food.Pie_Shade = 1;
-  user.items.food.Pie_White = 1;
-  user.items.food.Pie_Golden = 1;
-  user.items.food.Pie_Zombie = 1;
-  user.items.food.Pie_Desert = 1;
-  user.items.food.Pie_Red = 1;
-  user.migration = '20190314_pi_day';
-  /* eslint-enable camelcase */
 
   if (user.registeredThrough === 'habitica-web') {
     taskTypes = ['habit', 'daily', 'todo', 'reward', 'tag'];
@@ -228,6 +211,7 @@ schema.pre('save', true, function preSaveUser (next, done) {
     // automatically granted an item during a certain time period:
     // if (!this.items.pets['JackOLantern-Base'] && moment().isBefore('2014-11-01'))
     // this.items.pets['JackOLantern-Base'] = 5;
+    // this.markModified('items.pets');
   }
 
   // Filter notifications, remove unvalid and not necessary, handle the ones that have special requirements

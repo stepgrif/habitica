@@ -351,6 +351,7 @@ import notificationMenu from './notificationsDropdown';
 import profileModal from '../userMenu/profileModal';
 import reportFlagModal from '../chat/reportFlagModal';
 import sendGemsModal from 'client/components/payments/sendGemsModal';
+import sync from 'client/mixins/sync';
 import userDropdown from './userDropdown';
 
 export default {
@@ -363,6 +364,7 @@ export default {
     sendGemsModal,
     userDropdown,
   },
+  mixins: [sync],
   data () {
     return {
       isUserDropdownOpen: false,
@@ -401,14 +403,6 @@ export default {
     },
     toggleUserDropdown () {
       this.isUserDropdownOpen = !this.isUserDropdownOpen;
-    },
-    async sync () {
-      this.$root.$emit('habitica::resync-requested');
-      await Promise.all([
-        this.$store.dispatch('user:fetch', {forceLoad: true}),
-        this.$store.dispatch('tasks:fetchUserTasks', {forceLoad: true}),
-      ]);
-      this.$root.$emit('habitica::resync-completed');
     },
     async getUserGroupPlans () {
       this.$store.state.groupPlans = await this.$store.dispatch('guilds:getGroupPlans');

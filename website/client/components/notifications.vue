@@ -587,7 +587,6 @@ export default {
             }, this.user.preferences.suppressModals.streak);
             this.playSound('Achievement_Unlocked');
             break;
-          case 'ULTIMATE_GEAR_ACHIEVEMENT':
           case 'REBIRTH_ACHIEVEMENT':
           case 'EMPTY_ARMORY_ACHIEVEMENT':
           case 'GUILD_JOINED_ACHIEVEMENT':

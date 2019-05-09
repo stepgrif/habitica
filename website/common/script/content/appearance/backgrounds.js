@@ -815,6 +815,34 @@ let backgrounds = {
       notes: t('backgroundFlowerMarketNotes'),
     },
   },
+  backgrounds042019: {
+    halflings_house: {
+      text: t('backgroundHalflingsHouseText'),
+      notes: t('backgroundHalflingsHouseNotes'),
+    },
+    blossoming_desert: {
+      text: t('backgroundBlossomingDesertText'),
+      notes: t('backgroundBlossomingDesertNotes'),
+    },
+    birch_forest: {
+      text: t('backgroundBirchForestText'),
+      notes: t('backgroundBirchForestNotes'),
+    },
+  },
+  backgrounds052019: {
+    dojo: {
+      text: t('backgroundDojoText'),
+      notes: t('backgroundDojoNotes'),
+    },
+    park_with_statue: {
+      text: t('backgroundParkWithStatueText'),
+      notes: t('backgroundParkWithStatueNotes'),
+    },
+    rainbow_meadow: {
+      text: t('backgroundRainbowMeadowText'),
+      notes: t('backgroundRainbowMeadowNotes'),
+    },
+  },
   incentiveBackgrounds: {
     violet: {
       text: t('backgroundVioletText'),

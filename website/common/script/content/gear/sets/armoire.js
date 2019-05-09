@@ -453,6 +453,15 @@ let armor = {
     set: 'vernalVestments',
     canOwn: ownsItem('armor_armoire_vernalVestment'),
   },
+  nephriteArmor: {
+    text: t('armorArmoireNephriteArmorText'),
+    notes: t('armorArmoireNephriteArmorNotes', { str: 7, per: 6 }),
+    value: 100,
+    str: 7,
+    per: 6,
+    set: 'nephrite',
+    canOwn: ownsItem('armor_armoire_nephriteArmor'),
+  },
 };
 
 let body = {
@@ -923,6 +932,22 @@ let head = {
     per: 12,
     set: 'vernalVestments',
     canOwn: ownsItem('head_armoire_vernalHennin'),
+  },
+  tricornHat: {
+    text: t('headArmoireTricornHatText'),
+    notes: t('headArmoireTricornHatNotes', { per: 10 }),
+    value: 100,
+    per: 10,
+    canOwn: ownsItem('head_armoire_tricornHat'),
+  },
+  nephriteHelm: {
+    text: t('headArmoireNephriteHelmText'),
+    notes: t('headArmoireNephriteHelmNotes', { per: 7, int: 6 }),
+    value: 100,
+    per: 7,
+    int: 6,
+    set: 'nephrite',
+    canOwn: ownsItem('head_armoire_nephriteHelm'),
   },
 };
 
@@ -1552,6 +1577,30 @@ let weapon = {
     con: 8,
     set: 'vernalVestments',
     canOwn: ownsItem('weapon_armoire_vernalTaper'),
+  },
+  jugglingBalls: {
+    text: t('weaponArmoireJugglingBallsText'),
+    notes: t('weaponArmoireJugglingBallsNotes', { int: 10 }),
+    value: 100,
+    int: 10,
+    canOwn: ownsItem('weapon_armoire_jugglingBalls'),
+  },
+  slingshot: {
+    text: t('weaponArmoireSlingshotText'),
+    notes: t('weaponArmoireSlingshotNotes', { str: 10 }),
+    value: 100,
+    str: 10,
+    canOwn: ownsItem('weapon_armoire_slingshot'),
+  },
+  nephriteBow: {
+    text: t('weaponArmoireNephriteBowText'),
+    notes: t('weaponArmoireNephriteBowNotes', { int: 7, str: 6 }),
+    value: 100,
+    int: 7,
+    str: 6,
+    set: 'nephrite',
+    twoHanded: true,
+    canOwn: ownsItem('weapon_armoire_nephriteBow'),
   },
 };
 

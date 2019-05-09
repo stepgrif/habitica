@@ -13,7 +13,7 @@ import forEach from 'lodash/forEach';
 import moment from 'moment';
 
 describe('shared.ops.purchase', () => {
-  const SEASONAL_FOOD = 'Pie_Base';
+  const SEASONAL_FOOD = 'Meat';
   let user;
   let goldPoints = 40;
   let analytics = {track () {}};
@@ -105,6 +105,47 @@ describe('shared.ops.purchase', () => {
       } catch (err) {
         expect(err).to.be.an.instanceof(NotFound);
         expect(err.message).to.equal(i18n.t('contentKeyNotFound', params));
+        done();
+      }
+    });
+
+    it('returns error when user supplies a non-numeric quantity', (done) => {
+      let type = 'eggs';
+      let key = 'Wolf';
+
+      try {
+        purchase(user, {params: {type, key}, quantity: 'jamboree'}, analytics);
+      } catch (err) {
+        expect(err).to.be.an.instanceof(BadRequest);
+        expect(err.message).to.equal(i18n.t('invalidQuantity'));
+        done();
+      }
+    });
+
+    it('returns error when user supplies a negative quantity', (done) => {
+      let type = 'eggs';
+      let key = 'Wolf';
+      user.balance = 10;
+
+      try {
+        purchase(user, {params: {type, key}, quantity: -2}, analytics);
+      } catch (err) {
+        expect(err).to.be.an.instanceof(BadRequest);
+        expect(err.message).to.equal(i18n.t('invalidQuantity'));
+        done();
+      }
+    });
+
+    it('returns error when user supplies a decimal quantity', (done) => {
+      let type = 'eggs';
+      let key = 'Wolf';
+      user.balance = 10;
+
+      try {
+        purchase(user, {params: {type, key}, quantity: 2.9}, analytics);
+      } catch (err) {
+        expect(err).to.be.an.instanceof(BadRequest);
+        expect(err.message).to.equal(i18n.t('invalidQuantity'));
         done();
       }
     });

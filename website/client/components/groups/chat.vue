@@ -1,12 +1,12 @@
 <template lang="pug">
   .row.chat-row
     .col-12
-      a.float-right(v-markdown='$t("markdownFormattingHelp")')
+      h3.float-left.label(:class="{accepted: communityGuidelinesAccepted }") {{ label }}
+      div.float-right(v-markdown='$t("markdownFormattingHelp")')
 
-      h3(v-once) {{ label }}
-      vue-tribute(:options="autocompleteOptions", v-on:tribute-replaced='autocompleteReplaced')
-        .user-entry(:placeholder='placeholder',
-                  @input="updateChatInput"
+      .row(v-if="communityGuidelinesAccepted")
+        textarea(:placeholder='placeholder',
+                  v-model='newMessage',
                   ref='user-entry',
                   :class='{"user-entry": newMessage}',
                   @keyup.ctrl.enter='sendMessageShortcut()',
@@ -15,6 +15,8 @@
                   :contenteditable='true'
                 )
       span.chat-count {{ currentLength }} / 3000
+
+      community-guidelines
 
       .row.chat-actions
         .col-6.chat-receive-actions
@@ -42,20 +44,14 @@
   import markdownDirective from 'client/directives/markdown';
   import communityGuidelines from './communityGuidelines';
   import chatMessage from '../chat/chatMessages';
-  import styleHelper from 'client/mixins/styleHelper';
-  import tier1 from 'assets/svg/tier-1.svg';
-  import tier2 from 'assets/svg/tier-2.svg';
-  import tier3 from 'assets/svg/tier-3.svg';
-  import tier4 from 'assets/svg/tier-4.svg';
-  import tier5 from 'assets/svg/tier-5.svg';
-  import tier6 from 'assets/svg/tier-6.svg';
-  import tier7 from 'assets/svg/tier-7.svg';
-  import tier8 from 'assets/svg/tier-mod.svg';
-  import tier9 from 'assets/svg/tier-staff.svg';
-  import tierNPC from 'assets/svg/tier-npc.svg';
+  import { mapState } from 'client/libs/store';
+  import markdownDirective from 'client/directives/markdown';
 
   export default {
-    props: ['label', 'group', 'placeholder', 'autocompleteContext'],
+    props: ['label', 'group', 'placeholder'],
+    directives: {
+      markdown: markdownDirective,
+    },
     components: {
       communityGuidelines,
       chatMessage,
@@ -112,8 +108,12 @@
       };
     },
     computed: {
+      ...mapState({user: 'user.data'}),
       currentLength () {
         return this.newMessage.length;
+      },
+      communityGuidelinesAccepted () {
+        return this.user.flags.communityGuidelinesAccepted;
       },
     },
     methods: {
@@ -126,12 +126,22 @@
       async sendMessage () {
         if (this.sending) return;
         this.sending = true;
-        let response = await this.$store.dispatch('chat:postChat', {
-          group: this.group,
-          message: this.newMessage,
-        });
-        this.group.chat.unshift(response.message);
-        this.newMessage = '';
+        let response;
+
+        try {
+          response = await this.$store.dispatch('chat:postChat', {
+            group: this.group,
+            message: this.newMessage,
+          });
+        } catch (e) {
+          // catch exception to allow function to continue
+        }
+
+        if (response) {
+          this.group.chat.unshift(response.message);
+          this.newMessage = '';
+        }
+
         this.sending = false;
         this.$refs['user-entry'].innerText = '';
 
@@ -234,21 +244,25 @@
   .chat-row {
     position: relative;
 
-    .user-entry {
-      font-style: normal;
-      color: $black;
+    .label:not(.accepted) {
+      color: #a5a1ac;
+    }
+
+    .row {
+      margin-left: 0;
+      margin-right: 0;
+      clear: both;
+    }
+
+    textarea {
       min-height: 150px;
       width: 100%;
       background-color: $white;
       box-shadow: 0 0 3pt 2pt white;
       border-radius: 2px;
       line-height: 1.43;
-      padding: .5em;
-      -moz-appearance: textfield-multiline;
-      -webkit-appearance: textarea;
-      background-color: -moz-field;
-      resize: vertical;
-      overflow: auto;
+      color: $gray-300;
+      padding: 10px 12px;
     }
 
     .user-entry:empty:before {
